@@ -1,0 +1,25 @@
+Look for "AAATT, TATA, GTTTAT, ATTTT, TTAATG, AATAA, TTTCT" motifs in 
+NC_001806.2, JQ673480.1, FJ527563.1 and NC_006273.2 genomes and their ORFs.
+
+--------------------
+all the motifs are stired in motifs.fa file
+Download genome and gff information from GenBank
+
+getGenBank NC_001806.2
+getGenBank JQ673480.1
+getGenBank FJ527563.1
+getGenBank NC_006273.2
+
+getGFF NC_001806.2
+getGFF JQ673480.1
+getGFF FJ527563.1
+getGFF NC_006273.2
+
+FIND_MOTIFS NC_001806.2.fa motifs.fa > NC_001806.2.motifs
+
+grep CDS NC_001806.2.gff |awk '{print $4,$5}' > f1
+grep CDS NC_001806.2.gff |awk '{printf "%s %s ", $4,$5; for(i=9;i<=NF;i++) printf "%s ",$i; print "" }'|sed s/product=/\|/g|cut -d\| -f2 |cut -d\; -f1 > f2
+
+paste f1 f2 > NC_001806.2.anno
+
+awk '{if(NR==FNR){s[NR]=$1; e[NR]=$2; line[NR]=$0; i++;} else {printf "%s ", $0; for(j=1;j<=i;j++) {if($1>=s[j] && $1<=e[j]) print line[j];  }  print "";}}' NC_001806.2.anno NC_001806.2.motifs |awk 'NF>0{if(NF>1) {printf "%s\t%s\t%s\t",$1,$2,$3; for(i=4;i<=NF;i++) printf "%s ",$i; print ""} else print}' > NC_001806.2.res
